@@ -5,6 +5,8 @@ from pyzbar.pyzbar import decode
 import numpy as np
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import simpledialog
+import webbrowser
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -100,6 +102,14 @@ def update_sheet(data, action):
     elif action == 'Exit':
         exit_sheet.append_row([data, current_date, current_time, action])
 
+# Open data log link
+def open_data_log():
+    password = simpledialog.askstring("Password", "Enter the Password:")
+    if password == "SNMD":
+        webbrowser.open("https://docs.google.com/spreadsheets/d/1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c")
+    else:
+        messagebox.showerror("Incorrect Password", "Sorry, the password is incorrect.")
+
 # Set up the GUI window and buttons
 root = tk.Tk()
 root.title("Actions")
@@ -115,11 +125,13 @@ window_position_x = int(screen_width / 2)
 window_position_y = 0
 root.geometry(f"{window_width}x{window_height}+{window_position_x}+{window_position_y}")
 
-entry_button = tk.Button(root, text="ENTRY", width=50, height=15, state="disabled", bg="white")
-exit_button = tk.Button(root, text="EXIT", width=50, height=15, state="disabled", bg="white")
+entry_button = tk.Button(root, text="ENTRY", width=50, height=10, state="disabled", bg="white")
+exit_button = tk.Button(root, text="EXIT", width=50, height=10, state="disabled", bg="white")
+data_log_button = tk.Button(root, text="DATA LOG", width=50, height=10, bg="white", command=open_data_log)
 
-entry_button.grid(row=0, column=0, padx=140, pady=50)
-exit_button.grid(row=1, column=0, padx=140, pady=15)
+entry_button.grid(row=0, column=0, padx=140, pady=35)
+exit_button.grid(row=1, column=0, padx=140, pady=10)
+data_log_button.grid(row=2, column=0, padx=140, pady=30)
 
 # Check the last log
 def check_last_log(data, action):
