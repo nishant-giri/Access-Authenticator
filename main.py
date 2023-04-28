@@ -108,27 +108,12 @@ unauthorized_images_count = 0
 
 # Open data log link
 def open_data_log():
-    attempts = 0
-    while attempts < 3:
         password = simpledialog.askstring("Password", "Enter the Password:", show="*")
         if password == "SNMD":
             webbrowser.open("https://docs.google.com/spreadsheets/d/1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c")
             return
         else:
-            attempts += 1
-            messagebox.showerror("Incorrect Password", f"Sorry, the password is incorrect. You have {3 - attempts} attempts left.")
-    messagebox.showerror("Too Many Attempts", "You have entered an incorrect password more than three times. Your photo will be taken and stored.")
-
-    # Capture the image for unauthorized access
-    ret, frame = cap.read()
-    if ret and frame is not None:
-        # Create a folder if it doesn't exist
-        if not os.path.exists("captured_images"):
-            os.makedirs("captured_images")
-        # Save the image in the folder
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"captured_images/unauthorized_{timestamp}.png"
-        cv2.imwrite(filename, frame)
+            messagebox.showerror("Incorrect Password", "Sorry, the password is incorrect.")
 
 # Set up the GUI window and buttons
 root = tk.Tk()
@@ -145,13 +130,110 @@ window_position_x = int(screen_width / 2)
 window_position_y = 0
 root.geometry(f"{window_width}x{window_height}+{window_position_x}+{window_position_y}")
 
+# Create a new window for the admin access
+admin_window = tk.Toplevel(root)
+admin_window.title("Admin Panel")
+admin_window.geometry(f"{window_width}x{window_height}+{window_position_x}+{window_position_y}")
+# Hide the window initially until correct password is entered for admin access
+admin_window.withdraw()
+
+# Function to show the admin access
+def open_admin():
+    attempts = 0
+    while attempts < 3:
+        password = simpledialog.askstring("Password", "Enter the Password:", show="*")
+        if password == "admin":
+            admin_window.deiconify()
+            root.withdraw()
+            break
+        else:
+            attempts += 1
+            messagebox.showerror("Incorrect Password", f"Sorry, the password is incorrect. You have {3 - attempts} attempts left.")
+
+    if attempts == 3:
+        messagebox.showerror("Too Many Attempts", "You have entered an incorrect password more than three times. Your photo will be taken and stored.")
+
+    # Capture the image for unauthorized access
+    ret, frame = cap.read()
+    if ret and frame is not None:
+        # Create a folder if it doesn't exist
+        if not os.path.exists("captured_images"):
+            os.makedirs("captured_images")
+        # Save the image in the folder
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"captured_images/unauthorized_{timestamp}.png"
+        cv2.imwrite(filename, frame)
+
+# Function to register new roll number in admin access
+def register_roll_number():
+    roll_number = simpledialog.askstring("Register Roll Number", "Enter the Roll Number:")
+    if roll_number:
+        # Read the content of the authorized.txt file
+        with open('authorized.txt', 'r') as file:
+            content = file.readlines()
+
+        # Check if the roll number is already present in the file
+        if roll_number + '\n' in content:
+            messagebox.showerror("Roll Number Already Registered", f"The roll number {roll_number} is already registered.")
+        else:
+            # Add the roll number to the file if it's unique
+            with open("authorized.txt", "a") as f:
+                f.write(f"{roll_number}\n")
+            messagebox.showinfo("Roll Number Registered", f"The roll number {roll_number} has been registered successfully.")
+
+# Function to delete roll number from file
+def delete_roll_number():
+    # Create a dialog box to ask for the roll number to be deleted
+    roll_number = simpledialog.askstring("Delete Roll Number", "Enter the Roll Number:")
+
+    if roll_number is not None:
+        # Read the content of the authorized.txt file
+        with open('authorized.txt', 'r') as file:
+            content = file.readlines()
+
+        # Remove the roll number from the content
+        try:
+            content.remove(roll_number + '\n')
+        except ValueError:
+            messagebox.showerror("Roll Number Not Found", f"The Roll Number {roll_number} was not found.")
+            return
+
+        # Remove the blank lines if any
+        content = list(filter(lambda x: x.strip(), content))
+
+        # Write the modified content back to the authorized.txt file
+        with open('authorized.txt', 'w') as file:
+            file.writelines(content)
+        messagebox.showinfo("Roll Number Deleted", f"The Roll Number {roll_number} has been deleted successfully.")
+        
 entry_button = tk.Button(root, text="ENTRY", width=50, height=10, state="disabled", bg="white")
 exit_button = tk.Button(root, text="EXIT", width=50, height=10, state="disabled", bg="white")
-data_log_button = tk.Button(root, text="DATA LOG", width=50, height=10, bg="white", command=open_data_log)
+admin_button = tk.Button(root, text="ADMIN", width=50, height=10, bg="white", command=open_admin)
 
 entry_button.grid(row=0, column=0, padx=140, pady=35)
 exit_button.grid(row=1, column=0, padx=140, pady=10)
-data_log_button.grid(row=2, column=0, padx=140, pady=30)
+admin_button.grid(row=3, column=0, padx=140, pady=30)
+
+# Function to go back to user mode
+def go_back_to_user_mode():
+    admin_window.withdraw()
+    root.deiconify()
+
+# Add a back button to the admin window
+back_button = tk.Button(admin_window, text="BACK", width=50, height=10, bg="white", command=go_back_to_user_mode)
+back_button.pack()
+
+# Add a button to the admin access to open the data log
+data_log_button_admin = tk.Button(admin_window, text="DATA LOG", width=50, height=10, bg="white", command=open_data_log)
+data_log_button_admin.pack()
+
+# Add a button to the admin access to register new roll number
+register_button_admin = tk.Button(admin_window, text="REGISTER ROLL NUMBER", width=50, height=10, bg="white", command=register_roll_number)
+register_button_admin.pack()
+
+# Add a button to the admin access to delete a roll number
+delete_roll_button = tk.Button(admin_window, text="DELETE ROLL NUMBER", width=50, height=10, bg="white", command=delete_roll_number)
+delete_roll_button.pack()
 
 # Check the last log
 def check_last_log(data, action):
@@ -194,7 +276,6 @@ while True:
                     # Reset the unauthorized count if an authorized person is detected
                     unauthorized_images_count = 0
                 else:
-                    open_data_log()
                     entry_button.config(state=tk.DISABLED)
                     exit_button.config(state=tk.DISABLED)
                     messagebox.showerror("Unauthorized", "Access Denied")
