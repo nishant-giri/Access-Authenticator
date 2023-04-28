@@ -4,6 +4,7 @@ import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 import tkinter as tk
+import os
 from tkinter import messagebox
 from tkinter import simpledialog
 import webbrowser
@@ -102,13 +103,32 @@ def update_sheet(data, action):
     elif action == 'Exit':
         exit_sheet.append_row([data, current_date, current_time, action])
 
+# Create a global variable to keep track of unauthorized people
+unauthorized_images_count = 0
+
 # Open data log link
 def open_data_log():
-    password = simpledialog.askstring("Password", "Enter the Password:")
-    if password == "SNMD":
-        webbrowser.open("https://docs.google.com/spreadsheets/d/1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c")
-    else:
-        messagebox.showerror("Incorrect Password", "Sorry, the password is incorrect.")
+    attempts = 0
+    while attempts < 3:
+        password = simpledialog.askstring("Password", "Enter the Password:", show="*")
+        if password == "SNMD":
+            webbrowser.open("https://docs.google.com/spreadsheets/d/1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c")
+            return
+        else:
+            attempts += 1
+            messagebox.showerror("Incorrect Password", f"Sorry, the password is incorrect. You have {3 - attempts} attempts left.")
+    messagebox.showerror("Too Many Attempts", "You have entered an incorrect password more than three times. Your photo will be taken and stored.")
+
+    # Capture the image for unauthorized access
+    ret, frame = cap.read()
+    if ret and frame is not None:
+        # Create a folder if it doesn't exist
+        if not os.path.exists("captured_images"):
+            os.makedirs("captured_images")
+        # Save the image in the folder
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"captured_images/unauthorized_{timestamp}.png"
+        cv2.imwrite(filename, frame)
 
 # Set up the GUI window and buttons
 root = tk.Tk()
@@ -150,29 +170,34 @@ def check_last_log(data, action):
         return False
 
 # Start the main loop
+unauthorized_images_count = 0
 while True:
     ret, frame = cap.read()
+    
+    if ret and frame is not None:
+        for barcode in decode(frame):
+            qr_info = [barcode]
+            cv2.polylines(frame, [np.array(barcode.polygon)], True, (255, 0, 0), 5)
 
-    for barcode in decode(frame):
-        qr_info = [barcode]
-        cv2.polylines(frame, [np.array(barcode.polygon)], True, (255, 0, 0), 5)
+            if qr_info:
+                data = qr_info[0].data.decode()
 
-        if qr_info:
-            data = qr_info[0].data.decode()
-
-            if data in authorized_users:
-                if check_last_log(data, "entry"):
-                    messagebox.showinfo("Authorized", "Access Granted. Make your Exit.")
+                if data in authorized_users:
+                    if check_last_log(data, "entry"):
+                        messagebox.showinfo("Authorized", "Access Granted. Make your Exit.")
+                        entry_button.config(state=tk.DISABLED)
+                        exit_button.config(state=tk.NORMAL)
+                    elif check_last_log(data, "exit"):
+                        messagebox.showinfo("Authorized", "Access Granted. Make your Entry.")
+                        entry_button.config(state=tk.NORMAL)
+                        exit_button.config(state=tk.DISABLED)
+                    # Reset the unauthorized count if an authorized person is detected
+                    unauthorized_images_count = 0
+                else:
+                    open_data_log()
                     entry_button.config(state=tk.DISABLED)
-                    exit_button.config(state=tk.NORMAL)
-                elif check_last_log(data, "exit"):
-                    messagebox.showinfo("Authorized", "Access Granted. Make your Entry.")
-                    entry_button.config(state=tk.NORMAL)
                     exit_button.config(state=tk.DISABLED)
-            else:
-                entry_button.config(state=tk.DISABLED)
-                exit_button.config(state=tk.DISABLED)
-                messagebox.showerror("Unauthorized", "Access Denied")
+                    messagebox.showerror("Unauthorized", "Access Denied")
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
