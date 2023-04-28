@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "access-authenticator-385111",
+  "private_key_id": "93691effbea64b252f095e9d3c3b732109aca18c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCzikhWlk9JlxdW\nX4N7bUUtIkInQCZjUZmqMjU0niWY71l61jDDBVErZyVlJgx2rieV21MmT5Dx9/z7\nYZSshO1RL1jiisjyuxYfjcBbHUl6eXkUQxiB9/zyNMnBXIPwNGe64gpAuxXMbCxE\n8PM3OXflhzTKYWs2cnH00xCPS3MIkfO2VXBxxhen7L/evm7XkQIpZSMJ5GUK95KN\nuzJkJU+YCzh2fex+W616YWe73+CtPBmOTmtc4OnGtBIsKv4+ck3NxFgPFjDWVj7+\naXYzCfCs9V251+dH3qytegN78pPac+Adw+7sBeBFK3eaBW7UbnS6m8RsspDwwzm0\nA1nWmJPVAgMBAAECggEAKJML8YuDDB+57bJksbBaVY6cMiggdMoUZt71YLiLySHw\nUB8XQn+RXjRvgkokv25wskBwbGRHXrObR8k/8vQQeMwxM3NHYfmvUH61tbGq8SOC\nHjbikz6yup786Haqt450UcrzI7lT/hCFOahVYsnZQ3U4lDMLanDXOYu4fpW/v7Pw\nwQisiP03xj+oSkxiRRI8qUjgdWRcYsWA23D/ka6jX6WtgVyHAbMY9MtuIvxRxatp\n6YKxAwpYm7GPC9c8pi/5bkLeO4FZdG4tjeOCLnwg5sTo34+X2KDcz7xp5inSv/YY\npxj1WMuvlI0TK4LqqiJIlc2BLZDf4Vnzvg6S1mcrOQKBgQDwEs/jEIUPKcWR/pGW\nXmap1IKXyljoq1g3bEPCgpR9tx7SIiNPhi70iEZjdrHQ4EUcHSfl5+NjrTqj9hrN\nZegDwwG59kdb5xpnzBKEyrhEIlAh2PqoqZr9KrsiBP3/0xYmxxDF7tkrHavX7jDW\n7b/HueKCIStGHtwCs00mSeJpGQKBgQC/c22aYkPgU/QaJD+FRQe6c86C026SgjhF\nmWY0NyONqewoz/uF/5elwdgbzybd53NRV+vuEr3yrnu0ITRNma+4u9iMNZpX0GZZ\nL3XrnOcKxE1Nz9Jyk589Vav5I5z3uxvFppRRAv/AjcYkQs+o69960/sF/vk0N1rE\nHGaW9GGMHQKBgF7OfwxjpLhVPbGm/6WLSC2/P4dkIHJZ4C+a8LNqz+tJmsFPO/SW\nwApPmsSCxjv/pSsyFGSFi9X8PhEsCm+c0+BQbWkb6hhQDqx4+cM5L0Ww60ZCotJi\nkFN0QYxwvkH+AVx09pnD9j1BrXBLnzvxje/454uOP8GkRCxI1KnPObtZAoGAK9zf\nRJq04GV7rK2XXAo3vhEgRDr6v1hUWiXOE7J6U8+Virgz8Txg2xoxUBXC2t5XPlC9\nfhsPJ9WwA9IDsK/AYbuv3le9l9boTBCinKujB4V4DJbLqXKG7j99miP9p4hX0Y3b\ntz/PpqcUuWQRPatk1ThR78q9/6ebBQlYu8cbvkUCgYEAtC44YO98i5Sv/qJkLB0E\n/oJfNgMFrt75mH4VYdCezBG6FcUcP9B26AeobAzGqwFJke8BzbER1ZG/SgfZ1ZVq\nni1Nj7Czq8btsP7sgls6d3T/MXruobrTjrV2WGQ80kOjShlfiPNiR/rsDYssSzZ3\n8ENxZRXhzeubQf+hMwALOT4=\n-----END PRIVATE KEY-----\n",
+  "client_email": "access-authenticator-service@access-authenticator-385111.iam.gserviceaccount.com",
+  "client_id": "106889436464571967162",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/access-authenticator-service%40access-authenticator-385111.iam.gserviceaccount.com"
+}
