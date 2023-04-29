@@ -16,6 +16,7 @@ SERVICE_ACCOUNT_FILE = 'D:/online-attendance-system/access-authenticator-385111-
 SPREADSHEET_ID = '1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c'
 ENTRY_SHEET_NAME = 'Entry Log'
 EXIT_SHEET_NAME = 'Exit Log'
+DATA_SHEET_NAME = 'Data'
 
 # Authorize with the Google Sheets API
 scope = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
@@ -23,6 +24,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, s
 client = gspread.authorize(creds)
 entry_sheet = client.open_by_key(SPREADSHEET_ID).worksheet(ENTRY_SHEET_NAME)
 exit_sheet = client.open_by_key(SPREADSHEET_ID).worksheet(EXIT_SHEET_NAME)
+data_sheet = client.open_by_key(SPREADSHEET_ID).worksheet(DATA_SHEET_NAME)
 
 # Load the authorized users from a file
 with open('./authorized.txt', 'r') as f:
@@ -48,21 +50,27 @@ def popup_message():
     button.pack()
     popup.mainloop()
 
+last_qrcode_data = None
+
 # Display entry or exit successful message
 def display_message(action):
-    # Create a new message box window
-    msg_box = tk.Toplevel()
-    msg_box.title("Message")
-    msg_box.geometry("200x100")
+    global last_qrcode_data
+    if data != last_qrcode_data:
+        # Create a new message box window
+        msg_box = tk.Toplevel()
+        msg_box.title("Message")
+        msg_box.geometry("200x100")
 
-    # Add a label to the message box window
-    label = tk.Label(msg_box, text=action)
-    label.pack(side="top", fill="x", pady=35)
+        # Add a label to the message box window
+        label = tk.Label(msg_box, text=action)
+        label.pack(side="top", fill="x", pady=35)
 
-    # Schedule a function call to close the message box window after 2 seconds
-    msg_box.after(2000, lambda: msg_box.destroy())
+        # Schedule a function call to close the message box window after 2 seconds
+        msg_box.after(2000, lambda: msg_box.destroy())
 
-# Define the GUI functions
+        last_qrcode_data = data
+
+# Define the on entry function
 def on_entry(qr_info):
     data = qr_info[0].data.decode()
     if data in authorized_users:
@@ -72,6 +80,7 @@ def on_entry(qr_info):
     else:
         print("Access Denied")
 
+# Define the on exit function
 def on_exit(qr_info):
     data = qr_info[0].data.decode()
     if data in authorized_users:
@@ -81,6 +90,7 @@ def on_exit(qr_info):
     else:
         print("Access Denied")
 
+# Update the log
 def update_log(action):
     data = qr_info[0].data.decode()
     if data not in most_recent_access.keys() \
@@ -102,6 +112,25 @@ def update_sheet(data, action):
         entry_sheet.append_row([data, current_date, current_time, action])
     elif action == 'Exit':
         exit_sheet.append_row([data, current_date, current_time, action])
+
+# Send roll numbers data to sheet
+def send_roll_numbers_to_sheet():
+    data_sheet = client.open_by_key(SPREADSHEET_ID).worksheet(DATA_SHEET_NAME)
+
+    # Read the roll numbers from file
+    with open('authorized.txt', 'r') as f:
+        roll_numbers = set(f.read().splitlines())
+
+    # Remove duplicate roll numbers from file
+    unique_roll_numbers = list(set(roll_numbers))
+
+    # Get existing roll numbers from the sheet
+    existing_roll_numbers = set(data_sheet.col_values(1)[1:])
+
+    # Append only unique roll numbers to the sheet
+    for roll_number in unique_roll_numbers:
+        if roll_number not in existing_roll_numbers:
+            data_sheet.append_row([roll_number])
 
 # Create a global variable to keep track of unauthorized people
 unauthorized_images_count = 0
@@ -180,6 +209,7 @@ def register_roll_number():
             with open("authorized.txt", "a") as f:
                 f.write(f"{roll_number}\n")
             messagebox.showinfo("Roll Number Registered", f"The roll number {roll_number} has been registered successfully.")
+            send_roll_numbers_to_sheet()
 
 # Function to delete roll number from file
 def delete_roll_number():
@@ -266,11 +296,13 @@ while True:
 
                 if data in authorized_users:
                     if check_last_log(data, "entry"):
-                        messagebox.showinfo("Authorized", "Access Granted. Make your Exit.")
+                        # messagebox.showinfo("Authorized", "Access Granted. Make your Exit.")
+                        display_message("Access Granted. Make you Exit.", data)
                         entry_button.config(state=tk.DISABLED)
                         exit_button.config(state=tk.NORMAL)
                     elif check_last_log(data, "exit"):
-                        messagebox.showinfo("Authorized", "Access Granted. Make your Entry.")
+                        # messagebox.showinfo("Authorized", "Access Granted. Make your Entry.")
+                        display_message("Access Granted. Make you Entry.", data)
                         entry_button.config(state=tk.NORMAL)
                         exit_button.config(state=tk.DISABLED)
                     # Reset the unauthorized count if an authorized person is detected
@@ -278,7 +310,8 @@ while True:
                 else:
                     entry_button.config(state=tk.DISABLED)
                     exit_button.config(state=tk.DISABLED)
-                    messagebox.showerror("Unauthorized", "Access Denied")
+                    # messagebox.showerror("Unauthorized", "Access Denied")
+                    display_message("Access Denied.", data)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
