@@ -10,6 +10,7 @@ from tkinter import simpledialog
 import webbrowser
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import notify
 
 # Define your Google Sheets credentials and sheet information
 SERVICE_ACCOUNT_FILE = 'D:/online-attendance-system/access-authenticator-385111-93691effbea6.json'
@@ -78,6 +79,7 @@ def on_entry(qr_info):
         display_message("Entry Successful")
         update_sheet(data, "Entry")
     else:
+        notify.sendmsg()
         print("Access Denied")
 
 # Define the on exit function
@@ -88,6 +90,7 @@ def on_exit(qr_info):
         display_message("Exit Successful")
         update_sheet(data, "Exit")
     else:
+        notify.sendmsg()
         print("Access Denied")
 
 # Update the log
@@ -311,6 +314,7 @@ while True:
                     entry_button.config(state=tk.DISABLED)
                     exit_button.config(state=tk.DISABLED)
                     # messagebox.showerror("Unauthorized", "Access Denied")
+                    notify.sendmsg()
                     display_message("Access Denied.", data)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
