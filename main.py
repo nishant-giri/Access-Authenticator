@@ -51,6 +51,22 @@ def popup_message():
     button.pack()
     popup.mainloop()
 
+# Check the last log
+def check_last_log(data, action):
+    last_log = ''
+    with open(log_path, 'r') as f:
+        lines = f.readlines()
+        for line in reversed(lines):
+            if line.startswith(data):
+                last_log = line
+                break
+        f.close()
+
+    if last_log and last_log.endswith(action + '\n'):
+        return True
+    else:
+        return False
+
 last_qrcode_data = None
 
 # Display entry or exit successful message
@@ -138,15 +154,6 @@ def send_roll_numbers_to_sheet():
 # Create a global variable to keep track of unauthorized people
 unauthorized_images_count = 0
 
-# Open data log link
-def open_data_log():
-        password = simpledialog.askstring("Password", "Enter the Password:", show="*")
-        if password == "SNMD":
-            webbrowser.open("https://docs.google.com/spreadsheets/d/1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c")
-            return
-        else:
-            messagebox.showerror("Incorrect Password", "Sorry, the password is incorrect.")
-
 # Set up the GUI window and buttons
 root = tk.Tk()
 root.title("Actions")
@@ -195,6 +202,20 @@ def open_admin():
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"captured_images/unauthorized_{timestamp}.png"
         cv2.imwrite(filename, frame)
+
+# Function to go back to user mode
+def go_back_to_user_mode():
+    admin_window.withdraw()
+    root.deiconify()
+
+# Open data log link
+def open_data_log():
+        password = simpledialog.askstring("Password", "Enter the Password:", show="*")
+        if password == "SNMD":
+            webbrowser.open("https://docs.google.com/spreadsheets/d/1CDykRNnzaveg5wsrgHpTHgUH_uDrX2mqFt4rmi7lO2c")
+            return
+        else:
+            messagebox.showerror("Incorrect Password", "Sorry, the password is incorrect.")
 
 # Function to register new roll number in admin access
 def register_roll_number():
@@ -247,11 +268,6 @@ entry_button.grid(row=0, column=0, padx=140, pady=35)
 exit_button.grid(row=1, column=0, padx=140, pady=10)
 admin_button.grid(row=3, column=0, padx=140, pady=30)
 
-# Function to go back to user mode
-def go_back_to_user_mode():
-    admin_window.withdraw()
-    root.deiconify()
-
 # Add a back button to the admin window
 back_button = tk.Button(admin_window, text="BACK", width=50, height=10, bg="white", command=go_back_to_user_mode)
 back_button.pack()
@@ -261,28 +277,12 @@ data_log_button_admin = tk.Button(admin_window, text="DATA LOG", width=50, heigh
 data_log_button_admin.pack()
 
 # Add a button to the admin access to register new roll number
-register_button_admin = tk.Button(admin_window, text="REGISTER ROLL NUMBER", width=50, height=10, bg="white", command=register_roll_number)
-register_button_admin.pack()
+register_roll_button_admin = tk.Button(admin_window, text="REGISTER ROLL NUMBER", width=50, height=10, bg="white", command=register_roll_number)
+register_roll_button_admin.pack()
 
 # Add a button to the admin access to delete a roll number
-delete_roll_button = tk.Button(admin_window, text="DELETE ROLL NUMBER", width=50, height=10, bg="white", command=delete_roll_number)
-delete_roll_button.pack()
-
-# Check the last log
-def check_last_log(data, action):
-    last_log = ''
-    with open(log_path, 'r') as f:
-        lines = f.readlines()
-        for line in reversed(lines):
-            if line.startswith(data):
-                last_log = line
-                break
-        f.close()
-
-    if last_log and last_log.endswith(action + '\n'):
-        return True
-    else:
-        return False
+delete_roll_button_admin = tk.Button(admin_window, text="DELETE ROLL NUMBER", width=50, height=10, bg="white", command=delete_roll_number)
+delete_roll_button_admin.pack()
 
 # Start the main loop
 unauthorized_images_count = 0
