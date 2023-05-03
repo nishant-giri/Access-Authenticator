@@ -70,7 +70,7 @@ def check_last_log(data, action):
 last_qrcode_data = None
 
 # Display entry or exit successful message
-def display_message(action):
+def display_message(action, data):
     global last_qrcode_data
     if data != last_qrcode_data:
         # Create a new message box window
@@ -92,7 +92,7 @@ def on_entry(qr_info):
     data = qr_info[0].data.decode()
     if data in authorized_users:
         update_log("entry")
-        display_message("Entry Successful")
+        display_message("Entry Successful", data)
         update_sheet(data, "Entry")
     else:
         notify.sendmsg()
@@ -103,7 +103,7 @@ def on_exit(qr_info):
     data = qr_info[0].data.decode()
     if data in authorized_users:
         update_log("exit")
-        display_message("Exit Successful")
+        display_message("Exit Successful", data)
         update_sheet(data, "Exit")
     else:
         notify.sendmsg()
